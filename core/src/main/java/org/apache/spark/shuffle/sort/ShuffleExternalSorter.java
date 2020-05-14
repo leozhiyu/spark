@@ -195,6 +195,7 @@ final class ShuffleExternalSorter extends MemoryConsumer {
         if (currentPartition != -1) {
           final FileSegment fileSegment = writer.commitAndGet();
           spillInfo.partitionLengths[currentPartition] = fileSegment.length();
+          spillInfo.partitionRecords[currentPartition] = fileSegment.record();
         }
         currentPartition = partition;
       }
