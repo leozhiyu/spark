@@ -305,7 +305,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
     tracker.registerMapOutput(10, 1, MapStatus(BlockManagerId("b", "hostB", 1000),
       Array(size10000, size0, size1000, size0)))
     assert(tracker.containsShuffle(10))
-    assert(tracker.getMapSizesByExecutorId(10, 0, 4, true).toSeq ===
+    assert(tracker.getMapSizesByExecutorId(10, 0, 4, false).toSeq ===
         Seq(
           (BlockManagerId("a", "hostA", 1000),
               Seq((ShuffleBlockId(10, 0, 1), size1000), (ShuffleBlockId(10, 0, 3), size10000))),
