@@ -49,7 +49,7 @@ class QueryStageSuite extends SparkFunSuite with BeforeAndAfterAll {
     val spark = SparkSession.builder()
       .master("local[*]")
       .appName("test")
-      .config("spark.ui.enabled", "false")
+      .config("spark.ui.enabled", "true")
       .config("spark.driver.allowMultipleContexts", "true")
       .config(SQLConf.SHUFFLE_MAX_NUM_POSTSHUFFLE_PARTITIONS.key, "5")
       .config(config.SHUFFLE_STATISTICS_VERBOSE.key, "true")

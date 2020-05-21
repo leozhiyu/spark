@@ -223,6 +223,7 @@ final class ShuffleExternalSorter extends MemoryConsumer {
     // writeSortedFile() in that case.
     if (currentPartition != -1) {
       spillInfo.partitionLengths[currentPartition] = committedSegment.length();
+      spillInfo.partitionRecords[currentPartition] = committedSegment.record();
       spills.add(spillInfo);
     }
 
