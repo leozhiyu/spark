@@ -854,14 +854,15 @@ class QueryStageSuite extends SparkFunSuite with BeforeAndAfterAll {
   test("different pre-shuffle partition number") {
     val spark = defaultSparkSession
     import spark.implicits._
-    spark.sql(s"""CREATE table test (age INT, name STRING)
+    val tName = "test" + scala.util.Random.nextInt(1000)
+    spark.sql(s"""CREATE table $tName (age INT, name STRING)
             | USING parquet""".stripMargin)
     val data: Seq[(Int, String)] = (1 to 2).map { i => (i, s"this is test $i") }
     data.toDF("key", "value").createOrReplaceTempView("t")
-    spark.sql("insert overwrite table test select * from t")
+    spark.sql(s"insert overwrite table $tName select * from t")
 
-    checkAnswer(spark.sql("select count(test.age) from test group by test.name" +
-      " union all select count(test.age) from test"),
+    checkAnswer(spark.sql(s"select count($tName.age) from $tName group by $tName.name" +
+      s" union all select count($tName.age) from $tName"),
       Row(1) :: Row(1) :: Row(2) :: Nil)
   }
 }
