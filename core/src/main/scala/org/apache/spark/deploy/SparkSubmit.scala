@@ -157,8 +157,10 @@ object SparkSubmit {
    */
   @tailrec
   private def submit(args: SparkSubmitArguments): Unit = {
+    // 这里用括号的语法，叫模式匹配
     val (childArgs, childClasspath, sysProps, childMainClass) = prepareSubmitEnvironment(args)
 
+    // 先声明了方法，后面调用该方法
     def doRunMain(): Unit = {
       if (args.proxyUser != null) {
         val proxyUser = UserGroupInformation.createProxyUser(args.proxyUser,
@@ -488,6 +490,7 @@ object SparkSubmit {
     // Also add the main application jar and any added jars to classpath in case YARN client
     // requires these jars.
     if (deployMode == CLIENT || isYarnCluster) {
+      // Yarn Client 模式，mainClass 是提交时指定的 -class 类
       childMainClass = args.mainClass
       if (isUserJar(args.primaryResource)) {
         childClasspath += args.primaryResource
@@ -571,6 +574,7 @@ object SparkSubmit {
     }
 
     // In yarn-cluster mode, use yarn.Client as a wrapper around the user class
+    // Yarn 集群模式
     if (isYarnCluster) {
       childMainClass = "org.apache.spark.deploy.yarn.Client"
       if (args.isPython) {
@@ -698,6 +702,7 @@ object SparkSubmit {
     var mainClass: Class[_] = null
 
     try {
+      // 反射加载类
       mainClass = Utils.classForName(childMainClass)
     } catch {
       case e: ClassNotFoundException =>
@@ -725,6 +730,7 @@ object SparkSubmit {
       printWarning("Subclasses of scala.App may not work correctly. Use a main() method instead.")
     }
 
+    // 查找 main 方法，并进行检查
     val mainMethod = mainClass.getMethod("main", new Array[String](0).getClass)
     if (!Modifier.isStatic(mainMethod.getModifiers)) {
       throw new IllegalStateException("The main method in the given main class must be static")

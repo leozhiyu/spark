@@ -354,6 +354,7 @@ private[spark] class ApplicationMaster(
       dummyRunner.launchContextDebugInfo()
     }
 
+    // 获取 yarn 资源
     allocator = client.register(driverUrl,
       driverRef,
       yarnConf,
@@ -363,6 +364,7 @@ private[spark] class ApplicationMaster(
       securityMgr,
       localResources)
 
+    // 分配资源
     allocator.allocateResources()
     reporterThread = launchReporterThread()
   }
@@ -389,6 +391,7 @@ private[spark] class ApplicationMaster(
 
   private def runDriver(securityMgr: SecurityManager): Unit = {
     addAmIpFilter()
+    // 启动用户程序
     userClassThread = startUserApplication()
 
     // This a bit hacky, but we need to wait until the spark.driver.port property has
@@ -404,6 +407,7 @@ private[spark] class ApplicationMaster(
           sc.getConf.get("spark.driver.host"),
           sc.getConf.get("spark.driver.port"),
           isClusterMode = true)
+        // 向 Yarn 注册 AM
         registerAM(sc.getConf, rpcEnv, driverRef, sc.ui.map(_.appUIAddress).getOrElse(""),
           securityMgr)
       } else {
@@ -627,6 +631,8 @@ private[spark] class ApplicationMaster(
     if (args.primaryRFile != null && args.primaryRFile.endsWith(".R")) {
       // TODO(davies): add R dependencies here
     }
+    // 获取用户应用的类的 main 方法
+    // userClass 就是提交应用时 --class 参数指定的类
     val mainMethod = userClassLoader.loadClass(args.userClass)
       .getMethod("main", classOf[Array[String]])
 
@@ -662,7 +668,9 @@ private[spark] class ApplicationMaster(
       }
     }
     userThread.setContextClassLoader(userClassLoader)
+    // 这其实就使我们平时所说的 Driver，实际上就是一个线程，是在 ApplicationMaster 进程中的线程
     userThread.setName("Driver")
+    // 启动 Driver 线程，执行用户类的 main 方法
     userThread.start()
     userThread
   }
@@ -781,7 +789,7 @@ object ApplicationMaster extends Logging {
  * apart the client-mode AM from the cluster-mode AM when using tools such as ps or jps.
  */
 object ExecutorLauncher {
-
+  // client 模式与 cluster 模式其实还是调用的同一个方法
   def main(args: Array[String]): Unit = {
     ApplicationMaster.main(args)
   }

@@ -407,6 +407,8 @@ private[yarn] class YarnAllocator(
   def handleAllocatedContainers(allocatedContainers: Seq[Container]): Unit = {
     val containersToUse = new ArrayBuffer[Container](allocatedContainers.size)
 
+    // 这三大段是属于机器选择：本地化，移动计算要优于移动数据
+
     // Match incoming requests by host
     val remainingAfterHostMatches = new ArrayBuffer[Container]
     for (allocatedContainer <- allocatedContainers) {
@@ -437,6 +439,7 @@ private[yarn] class YarnAllocator(
       }
     }
 
+    // 获取到了分配的机器，准备启动 container
     runAllocatedContainers(containersToUse)
 
     logInfo("Received %d containers from YARN, launching executors on %d of them."
@@ -502,6 +505,7 @@ private[yarn] class YarnAllocator(
 
       if (numExecutorsRunning < targetNumExecutors) {
         if (launchContainers) {
+          // 启动 container
           launcherPool.execute(new Runnable {
             override def run(): Unit = {
               try {

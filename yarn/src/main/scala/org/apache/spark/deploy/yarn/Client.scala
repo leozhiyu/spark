@@ -168,11 +168,13 @@ private[spark] class Client(
       verifyClusterResources(newAppResponse)
 
       // Set up the appropriate contexts to launch our AM
+      // 封装指令
       val containerContext = createContainerLaunchContext(newAppResponse)
       val appContext = createApplicationSubmissionContext(newApp, containerContext)
 
       // Finally, submit and monitor the application
       logInfo(s"Submitting application $appId to ResourceManager")
+      // 向 Yarn 提交指令
       yarnClient.submitApplication(appContext)
       appId
     } catch {
@@ -1164,6 +1166,7 @@ private[spark] class Client(
    * throw an appropriate SparkException.
    */
   def run(): Unit = {
+    // 启动 spark-shell 时也会有 appId，访问 Spark Web 页面时会用这个 id
     this.appId = submitApplication()
     if (!launcherBackend.isConnected() && fireAndForget) {
       val report = getApplicationReport(appId)
@@ -1208,6 +1211,7 @@ private[spark] class Client(
 
 private object Client extends Logging {
 
+  // Yarn Client 模式的入口
   def main(argStrings: Array[String]) {
     if (!sys.props.contains("SPARK_SUBMIT")) {
       logWarning("WARNING: This client is deprecated and will be removed in a " +
